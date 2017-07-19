@@ -2,6 +2,7 @@ define([
     "dojo/_base/declare",
     "mxui/widget/_WidgetBase",
     "dojo/_base/lang",
+    "dojo/aspect",
 
     "MobileFeatures/widget/plugins/spinner",
     "MobileFeatures/widget/plugins/dialog",
@@ -11,7 +12,7 @@ define([
     "MobileFeatures/widget/plugins/customconnectionerror",
     "MobileFeatures/widget/plugins/advanced"
 
-], function(declare, _WidgetBase, lang, spinner, dialog, transitions, classes, statusbar, customconnectionerror, advanced) {
+], function(declare, _WidgetBase, lang, aspect, spinner, dialog, transitions, classes, statusbar, customconnectionerror, advanced) {
     "use strict";
 
     return declare("MobileFeatures.widget.MobileFeatures", [
@@ -20,6 +21,7 @@ define([
     ], {
 
         _phonegapEnabled: false,
+        _onLogout: null,
 
         constructor: function () {
             this._phonegapEnabled = (typeof cordova !== "undefined");
@@ -61,6 +63,14 @@ define([
                 this._enableClasses();
                 this.statusbarEnabled && this._enableStatusbar();
                 this.customConnectionErrorEnabled && this._enableCustomConnectionError();
+
+                if (this.disableOnLogout) {
+                        this._onLogout = aspect.before(window.mx, "logout", lang.hitch(this, function () {
+                        this.debug(".beforeLogout");
+                        this._disableMobileFeatures();
+                        this._onLogout.remove();
+                    }));
+                }
             } else {
                 console.warn(this.id + " widget is only enabled in Hybrid Mobile app (Phonegap)");
             }
@@ -68,7 +78,11 @@ define([
 
         uninitialize: function() {
             this.debug(".uninitialize");
+            this._disableMobileFeatures();
+        },
 
+        _disableMobileFeatures: function() {
+            this.debug("._disableMobileFeatures");
             if (this._phonegapEnabled) {
                 this._disableClasses();
                 this.spinnerEnabled && this._disableSpinner();

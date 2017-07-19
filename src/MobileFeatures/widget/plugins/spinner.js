@@ -21,6 +21,7 @@ define([
 
         _spinnerMessageId: 1,
         _spinnerMessages: null,
+        _spinnerEnabled: false,
 
         _findInArray: function(array, test, scope) {
             for (var i = 0; i < array.length; i++) {
@@ -52,11 +53,13 @@ define([
                 //mx.ui.hideProgressOrig(0);
 
                 this._spinnerMessages = [];
+                this._spinnerEnabled = true;
             } else if (!!mx.ui.hideProgressOrig) {
                 this.debug("._enableSpinner spinner is already enabled. Locking previous one");
                 if (!window.__SpinnerLock) {
                     window.__SpinnerLock = true;
                 }
+                this._spinnerEnabled = true;
             } else {
                 console.warn(this.id + "._enableSpinner spinner not enabled. 'cordova-plugin-spinner' plugin missing in Phonegap");
             }
@@ -69,6 +72,10 @@ define([
                 return;
             }
             this.debug("._disableSpinner");
+            this._spinnerEnabled = false;
+            if (this._spinnerShowTimer !== null) {
+                clearTimeout(this._spinnerShowTimer);
+            }
             if (mx.ui.hideProgressOrig) {
                 mx.ui.hideProgress = mx.ui.hideProgressOrig;
                 mx.ui.hideProgressOrig = null;
@@ -94,6 +101,10 @@ define([
                     this._spinnerShowing = true;
                     this._spinnerShowPending = false;
                     this._spinnerShowTimer = null;
+                    if (!this._spinnerEnabled) {
+                        this.debug(".Spinner not shown, is disabled");
+                        return;
+                    }
                     window.SpinnerPlugin.activityStart(
                         !!msg ? msg : null,
                         !!msg ? this.spinnerOptions : { dimBackground: false },
@@ -104,9 +115,21 @@ define([
                             this.debug("._spinnerShow failed");
                         })
                     );
+                    this._spinnerShowTimer = null;
                 }), this.spinnerDelay);
             }
             return id;
+        },
+
+        _hideSpinner: function () {
+            window.SpinnerPlugin.activityStop(
+                lang.hitch(this, function () {
+                    this.debug("._spinnerHide succes");
+                }),
+                lang.hitch(this, function () {
+                    this.debug("._spinnerHide failed");
+                })
+            );
         },
 
         _spinnerHideProgressReplacement: function(pid) {
@@ -117,35 +140,25 @@ define([
             });
 
             if (this._spinnerShowPending) {
+                this.debug("._spinnerHideProgressReplacement pending");
                 clearTimeout(this._spinnerShowTimer);
                 this._spinnerShowTimer = null;
                 this._spinnerShowPending = false;
                 this._spinnerShowing = false;
-                window.SpinnerPlugin.activityStop(
-                    lang.hitch(this, function () {
-                        this.debug("._spinnerHide succes");
-                    }),
-                    lang.hitch(this, function () {
-                        this.debug("._spinnerHide failed");
-                    })
-                );
+                this._hideSpinner();
                 if (message) {
                     this._removeMsg(pid);
                 }
             } else if (this._spinnerShowing && message) {
+                this.debug("._spinnerHideProgressReplacement has message");
                 this._spinnerShowPending = false;
                 this._spinnerShowing = false;
-                window.SpinnerPlugin.activityStop(
-                    lang.hitch(this, function () {
-                        this.debug("._spinnerHide succes");
-                    }),
-                    lang.hitch(this, function () {
-                        this.debug("._spinnerHide failed");
-                    })
-                );
+                this._hideSpinner();
                 this._removeMsg(pid);
             } else if (pid !== null && pid !== undefined) {
+                this.debug("._spinnerHideProgressReplacement hide original");
                 mx.ui.hideProgressOrig(pid);
+                this._hideSpinner(); // We might have a residual spinner, so we trigger this as well.
             } else {
                 this.debug("._spinnerHideProgressReplacement not closing this progress, not triggered by plugin");
             }
