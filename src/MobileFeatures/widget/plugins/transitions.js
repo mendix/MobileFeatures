@@ -15,6 +15,7 @@ define([
         transitionsEnabled: false,
         fixedPixelsTop: 0,
         fixedPixelsBottom: 0,
+        transitionBeforePosition: "onNavigation", // Set in Modeler in 'Advanced'
 
         // Internal variables. Non-primitives created in the prototype are shared between all widget instances.
         _transitionListenerHandlers: [],
@@ -24,11 +25,16 @@ define([
         _onNavigation: null,
 
         _enableTransitions: function() {
-            this.debug("._enableTransitions");
+            this.debug("transitions._enableTransitions");
 
             ready(lang.hitch(this, this._setupMutationObserver));
-            //this._setupMutationObserver();
-            this._onNavigateTo = aspect.before(this.mxform, "onNavigation", lang.hitch(this, this._prepTransition));
+
+            if (this.transitionBeforePosition === "onPersistViewChange") {
+                this._onNavigateTo = this.connect(this.mxform, "onPersistViewState", lang.hitch(this,  this._prepTransition));
+            } else {
+                this._onNavigateTo = aspect.before(this.mxform, "onNavigation", lang.hitch(this, this._prepTransition));
+            }
+
             this._onNavigation = aspect.after(this.mxform, "onNavigation", lang.hitch(this, this._fireTransition));
         },
 
@@ -46,18 +52,22 @@ define([
         },
 
         _cleanupTransitions: function() {
-            this.debug("._cleanupTransitions");
+            this.debug("transitions._cleanupTransitions");
             if (this._transitionObserver) {
                 this._transitionObserver.disconnect();
             }
-            this._onNavigateTo.remove();
-            this._onNavigation.remove();
+            this._onNavigateTo && this._onNavigateTo.remove();
+            this._onNavigation && this._onNavigation.remove();
+
+            if (this._pendingTimeout) {
+                clearTimeout(this._pendingTimeout);
+            }
             //Disconnect any listeners
             this._disconnectListeners();
         },
 
         _setupMutationObserver: function() {
-            this.debug("._setupMutationObserver");
+            this.debug("transitions._setupMutationObserver");
             var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
             this._transitionObserver = new MutationObserver(lang.hitch(this, this._setupListeners));
@@ -77,7 +87,7 @@ define([
         },
 
         _setupListeners: function() {
-            this.debug("._setupListeners");
+            this.debug("transitions._setupListeners");
             this._disconnectListeners();
             if (typeof window.plugins !== "undefined" && typeof window.plugins.nativepagetransitions !== "undefined") {
                 // Setup handlers here
@@ -102,7 +112,7 @@ define([
             if (elements.length === 0) {
                 return;
             } else {
-                this.debug("._addTransition " + className + " " + elements.length + " found");
+                this.debug("transitions._addTransition " + className + " " + elements.length + " found");
             }
 
             if (transitionType === "fade") {
@@ -156,7 +166,7 @@ define([
         },
 
         _prepTransition: function(deferred) {
-            this.debug("._prepTransition");
+            this.debug("transitions._prepTransition");
             //instead of setting up a pending when a button is clicked, we're just going to leave options on the plugin object, then prep it before onNavigation.
             //Then we'll call the actual animation after onNavigation
             //This should solve a bunch of problems with taking a screenshot too early, and covering up things like errors
@@ -187,19 +197,20 @@ define([
         },
 
         _fireTransition: function(deferred) {
-            this.debug("._fireTransition");
+            this.debug("transitions._fireTransition");
             //Cancel a pending cancel transition timeout
             clearTimeout(this._pendingTimeout);
 
             //Run whatever pending transition is waiting
             if (window.plugins && typeof window.plugins.nativepagetransitions !== "undefined") {
                 window.plugins.nativepagetransitions.executePendingTransition(
-                    function(msg) {
-                        //console.log("executePendingTransition", msg);
-                    }, // called when the animation has finished
-                    function(msg) {
+                    lang.hitch(this, function(msg) {
+                        this.debug("transitions.executePendingTransition", msg);
+                    }), // called when the animation has finished
+                    lang.hitch(this, function(msg) {
+                        this.debug("transitions.executePendingTransition error", msg);
                         alert("error: " + msg);
-                    } // called in case you pass in weird values
+                    }) // called in case you pass in weird values
                 );
             }
 
@@ -207,12 +218,11 @@ define([
         },
 
         _cancelTransition: function() {
-            this.debug("._cancelTransition");
+            this.debug("transitions._cancelTransition");
             window.plugins.nativepagetransitions.cancelPendingTransition(
-
-            function(msg) {
-                //console.log("cancelPendingTransition", msg);
-            } // called when the screenshot was hidden (almost instantly)
+                lang.hitch(this, function(msg) {
+                    this.debug("transitions.cancelPendingTransition", msg);
+                }) // called when the screenshot was hidden (almost instantly)
             );
         }
     });
