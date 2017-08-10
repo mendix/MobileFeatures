@@ -23,6 +23,7 @@ define([
         _pendingTimeout: null,
         _onNavigateTo: null,
         _onNavigation: null,
+        _aroundNavigation: null,
 
         _enableTransitions: function() {
             this.debug("transitions._enableTransitions");
@@ -30,12 +31,39 @@ define([
             ready(lang.hitch(this, this._setupMutationObserver));
 
             if (this.transitionBeforePosition === "onPersistViewChange") {
-                this._onNavigateTo = this.connect(this.mxform, "onPersistViewState", lang.hitch(this,  this._prepTransition));
+                this._aroundNavigation = aspect.around(this.mxform, "onPersistViewState", lang.hitch(this, function (onPersistViewState) {
+                    return lang.hitch(this, function () {
+                        var args = arguments;
+                        this.sequence([
+                            function(cb) {
+                                setTimeout(cb, 1); // We're setting a timeout so the ui has set the actions in the "onClick"
+                            },
+                            function(cb) {
+                                this.debug("onPersistViewState seq 1");
+                                this._prepTransition();
+                                setTimeout(cb, 1);
+                            },
+                            function(cb) {
+                                this.debug("onPersistViewState seq 2");
+                                onPersistViewState.apply(this, args);
+                                setTimeout(cb, 1);
+                            },
+                            function(cb) {
+                                this.debug("onPersistViewState seq 3");
+                                this._fireTransition();
+                                setTimeout(cb, 1);
+                            },
+                        ], function () {
+                            this.debug("transition fired");
+                        });
+                    });
+                }));
             } else {
                 this._onNavigateTo = aspect.before(this.mxform, "onNavigation", lang.hitch(this, this._prepTransition));
+                this._onNavigation = aspect.after(this.mxform, "onNavigation", lang.hitch(this, this._fireTransition));
             }
 
-            this._onNavigation = aspect.after(this.mxform, "onNavigation", lang.hitch(this, this._fireTransition));
+
         },
 
         _disconnectListeners: function () {
@@ -58,6 +86,7 @@ define([
             }
             this._onNavigateTo && this._onNavigateTo.remove();
             this._onNavigation && this._onNavigation.remove();
+            this._aroundNavigation && this._aroundNavigation.remove();
 
             if (this._pendingTimeout) {
                 clearTimeout(this._pendingTimeout);
@@ -179,12 +208,13 @@ define([
                 var transitionType = window.plugins.nativepagetransitions.nextTransition;
                 window.plugins.nativepagetransitions[transitionType](
                     window.plugins.nativepagetransitions.nextOptions,
-                    function(msg) {
-                        //console.log("success: " + msg);
-                    }, // called when the animation has finished
-                    function(msg) {
+                    lang.hitch(this, function(msg) {
+                        this.debug("transitions._prepped", msg);
+                    }), // called when the animation has finished
+                    lang.hitch(this, function(msg) {
+                        this.debug("transitions._prepped error", msg);
                         alert("error: " + msg);
-                    } // called in case you pass in weird values
+                    }) // called in case you pass in weird valuesyou pass in weird values
                 );
 
                 window.plugins.nativepagetransitions.nextTransition = null;
