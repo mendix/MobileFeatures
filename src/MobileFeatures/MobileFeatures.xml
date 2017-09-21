@@ -177,7 +177,7 @@ Note: this is an experimental feature. Switch it off if you experience problems.
             <description>When this feature is turned on the group box will render the items after the page is loaded which can greatly increase the user experience.
 Note: this is an experimental feature. Switch it off if you experience problems.</description>
         </property>
-        <property key="disableOnLogout" type="boolean" defaultValue="false">
+        <property key="disableOnLogout" type="boolean" defaultValue="true">
             <caption>Disable on logout</caption>
             <category>Advanced</category>
             <description>The widget might run into problems with the spinner when the login page does not have a layout with the MobileFeatures widget. This option makes sure the widget is completely disabled on logout.</description>
