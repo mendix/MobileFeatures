@@ -186,5 +186,10 @@ Note: this is an experimental feature. Switch it off if you experience problems.
               <enumerationValue key="onPersistViewChange">On view change (offline)</enumerationValue>
             </enumerationValues>
         </property>
+        <property key="onPauseTransitionTimeout" type="integer" required="true" defaultValue="10">
+            <caption>On pause timeout</caption>
+            <category>Advanced</category>
+            <description>When pausing the app (suspend, without quitting) transitions should be cancelled to prevent unwanted behavior in older Android versions. We set a timeout (in ms) to cancel the transition after the app is paused. Only change this setting when needed.</description>
+        </property>
     </properties>
 </widget>

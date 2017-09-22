@@ -15,7 +15,8 @@ define([
         transitionsEnabled: false,
         fixedPixelsTop: 0,
         fixedPixelsBottom: 0,
-        transitionBeforePosition: "onNavigation", // Set in Modeler in 'Advanced'
+        transitionBeforePosition: "onNavigation",    // Set in Modeler in 'Advanced'
+        onPauseTransitionTimeout: 10,                // Set in Modeler in 'Advanced'
 
         // Internal variables. Non-primitives created in the prototype are shared between all widget instances.
         _transitionListenerHandlers: [],
@@ -24,6 +25,9 @@ define([
         _onNavigateTo: null,
         _onNavigation: null,
         _aroundNavigation: null,
+        _onPauseListener: null,
+        _onResumeListener: null,
+        _paused: false,
 
         _enableTransitions: function() {
             this.debug("transitions._enableTransitions");
@@ -63,7 +67,21 @@ define([
                 this._onNavigation = aspect.after(this.mxform, "onNavigation", lang.hitch(this, this._fireTransition));
             }
 
+            this._onPauseListener = this.connect(document, "pause", lang.hitch(this, this._onPause));
+            this._onResumeListener = this.connect(document, "resume", lang.hitch(this, this._onResume));
+        },
 
+        _onPause: function() {
+            this.debug(this.id + "._onPause");
+            setTimeout(lang.hitch(this, function () {
+                this._paused = true;
+                this._cancelTransition();
+            }), this.onPauseTransitionTimeout);
+        },
+
+        _onResume: function() {
+            this.debug(this.id + "._onResume");
+            this._paused = false;
         },
 
         _disconnectListeners: function () {
@@ -87,6 +105,9 @@ define([
             this._onNavigateTo && this._onNavigateTo.remove();
             this._onNavigation && this._onNavigation.remove();
             this._aroundNavigation && this._aroundNavigation.remove();
+
+            this._onPauseListener && this._onPauseListener.remove();
+            this._onResumeListener && this._onResumeListener.remove();
 
             if (this._pendingTimeout) {
                 clearTimeout(this._pendingTimeout);
