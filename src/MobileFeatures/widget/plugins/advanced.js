@@ -1,12 +1,9 @@
 define([
     "dojo/_base/declare",
-    "dojo/_base/lang",
-    "dojo/dom-class",
-    "dojo/_base/window"
-], function(declare, lang, dojoClass, win) {
+    "dijit/registry"
+], function(declare, dijitRegistry) {
     "use strict";
 
-    // Declare widget's prototype.
     return declare("MobileFeatures.widget.advanced", [], {
 
         advancedListViewLazyLoad: true,
@@ -30,18 +27,22 @@ define([
         },
 
         _enableGroupboxLazyLoad: function() {
-            window.mxui.widget.GroupBox.prototype.update = function(obj, cb) {
-                window.setTimeout(function() {
-                    var i = this;
-                    function n() {
-                        require(["dijit/registry"], function(registry) {
-                            i.passContext(registry.findWidgets(i.domNode), cb);
-                        });
+            window.mxui.widget.GroupBox.prototype.update = function(obj, callback) {
+                if (this.class.indexOf("disable-lazy") == -1) {
+                    window.setTimeout(function() {
+                        if (this._captionTextTemplate) {
+                            this._captionTextTemplate.update(obj);
+                        }
+                        this.passContext(dijitRegistry.findWidgets(this.domNode));
+                    }.bind(this), 0);
+                    if (callback) {
+                        callback();
                     }
-                    this._captionTextTemplate ? this._captionTextTemplate.update(obj, n) : n();
-                }.bind(this), 0);
-                if (cb) {
-                    cb();
+                } else {
+                    if (this._captionTextTemplate) {
+                        this._captionTextTemplate.update(obj);
+                    }
+                    this.passContext(dijitRegistry.findWidgets(this.domNode), callback);
                 }
             };
         }
