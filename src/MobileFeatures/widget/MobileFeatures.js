@@ -96,7 +96,7 @@ define([
             if (window.__MobileFeatures_debugging) {
                 console.log.apply(console, arguments);
             } else {
-                logger.debug.apply(this, arguments);
+                logger.debug.apply(logger, arguments);
             }
         }
     });
