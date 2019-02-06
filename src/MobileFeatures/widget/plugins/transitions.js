@@ -166,46 +166,49 @@ define([
             }
 
             if (transitionType === "fade") {
-
-                handle = elements.on("click", lang.hitch(this, function() {
-                    this.debug(this.id + " click transition " + transitionType);
-                    window.plugins.nativepagetransitions.nextTransition = transitionType;
-                    window.plugins.nativepagetransitions.nextOptions = {
-                        "duration": duration, // in milliseconds (ms), default 400
-                        "iosdelay": -1, // ms to wait for the iOS webview to update before animation kicks in, default 60
-                        "androiddelay": -1
-                    };
+                elements.forEach(lang.hitch(this, function (node, index, nodelist) {
+                    node.onclick = lang.hitch(this, function () {
+                        this.debug(this.id + " click transition " + transitionType);
+                        window.plugins.nativepagetransitions.nextTransition = transitionType;
+                        window.plugins.nativepagetransitions.nextOptions = {
+                            "duration": duration, // in milliseconds (ms), default 400
+                            "iosdelay": -1, // ms to wait for the iOS webview to update before animation kicks in, default 60
+                            "androiddelay": -1
+                        };
+                    });
                 }));
 
             } else if (transitionType === "slide") {
-
-                handle = elements.on("click", lang.hitch(this, function() {
-                    this.debug(this.id + " click transition " + transitionType + " " + direction);
-                    window.plugins.nativepagetransitions.nextTransition = transitionType;
-                    window.plugins.nativepagetransitions.nextOptions = {
-                        "direction": direction, // "left|right|up|down", default "left" (which is like "next")
-                        "duration": duration, // in milliseconds (ms), default 400
-                        "slowdownfactor": 2, // overlap views (higher number is more) or no overlap (1), default 4
-                        "iosdelay": -1, //defer transitions until they"re called later ////60, // ms to wait for the iOS webview to update before animation kicks in, default 60
-                        "androiddelay": -1, //defer transitions until they"re called later ////70 // same as above but for Android, default 70
-                        "winphonedelay": 200, // same as above but for Windows Phone, default 200,
-                        "fixedPixelsTop": this.fixedPixelsTop, // the number of pixels of your fixed header, default 0 (iOS and Android)
-                        "fixedPixelsBottom": this.fixedPixelsBottom // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
-                    };
+                elements.forEach(lang.hitch(this, function (node, index, nodelist) {
+                    node.onclick = lang.hitch(this, function () {
+                        this.debug(this.id + " click transition " + transitionType + " " + direction);
+                        window.plugins.nativepagetransitions.nextTransition = transitionType;
+                        window.plugins.nativepagetransitions.nextOptions = {
+                            "direction": direction, // "left|right|up|down", default "left" (which is like "next")
+                            "duration": duration, // in milliseconds (ms), default 400
+                            "slowdownfactor": 2, // overlap views (higher number is more) or no overlap (1), default 4
+                            "iosdelay": -1, //defer transitions until they"re called later ////60, // ms to wait for the iOS webview to update before animation kicks in, default 60
+                            "androiddelay": -1, //defer transitions until they"re called later ////70 // same as above but for Android, default 70
+                            "winphonedelay": 200, // same as above but for Windows Phone, default 200,
+                            "fixedPixelsTop": this.fixedPixelsTop, // the number of pixels of your fixed header, default 0 (iOS and Android)
+                            "fixedPixelsBottom": this.fixedPixelsBottom // the number of pixels of your fixed footer (f.i. a tab bar), default 0 (iOS and Android)
+                        };
+                    });
                 }));
 
             } else if (transitionType === "flip") {
-
-                handle = elements.on("click", lang.hitch(this, function() {
-                    this.debug(this.id + " click transition " + transitionType + " " + direction);
-                    window.plugins.nativepagetransitions.nextTransition = transitionType;
-                    window.plugins.nativepagetransitions.nextOptions = {
-                        "direction": direction, // "left|right|up|down", default "left" (which is like "next")
-                        "duration": duration, // in milliseconds (ms), default 400
-                        "iosdelay": -1, //defer transitions until they"re called later ////60, // ms to wait for the iOS webview to update before animation kicks in, default 60
-                        "androiddelay": -1, //defer transitions until they"re called later ////70 // same as above but for Android, default 70
-                        "winphonedelay": 200, // same as above but for Windows Phone, default 200,
-                    };
+                elements.forEach(lang.hitch(this, function (node, index, nodelist) {
+                    node.onclick = lang.hitch(this, function () {
+                        this.debug(this.id + " click transition " + transitionType + " " + direction);
+                        window.plugins.nativepagetransitions.nextTransition = transitionType;
+                        window.plugins.nativepagetransitions.nextOptions = {
+                            "direction": direction, // "left|right|up|down", default "left" (which is like "next")
+                            "duration": duration, // in milliseconds (ms), default 400
+                            "iosdelay": -1, //defer transitions until they"re called later ////60, // ms to wait for the iOS webview to update before animation kicks in, default 60
+                            "androiddelay": -1, //defer transitions until they"re called later ////70 // same as above but for Android, default 70
+                            "winphonedelay": 200, // same as above but for Windows Phone, default 200,
+                        };
+                    });
                 }));
 
             }
