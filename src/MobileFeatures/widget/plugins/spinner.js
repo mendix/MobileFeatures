@@ -52,8 +52,10 @@ define([
                 mx.ui.hideProgress = this._spinnerHideProgressReplacement.bind(this);
                 //mx.ui.hideProgressOrig(0);
 
-                this._spinnerMessages = [];
-                this._spinnerEnabled = true;
+                window.__SpinnerMessages = window.__SpinnerMessages || [];
+                window.__SpinnerMessageID = window.__SpinnerMessageID || 1;
+                // this._spinnerMessages = [];
+                // this._spinnerEnabled = true;
             } else if (!!mx.ui.hideProgressOrig) {
                 this.debug("._enableSpinner spinner is already enabled. Locking previous one");
                 if (!window.__SpinnerLock) {
@@ -88,8 +90,8 @@ define([
 
         _spinnerShowProgressReplacement: function(msg, modal) {
             this.debug("._spinnerShowProgressReplacement");
-            var id = this._spinnerMessageId++;
-            this._spinnerMessages.push({
+            var id = window.__SpinnerMessageID++;
+            window.__SpinnerMessages.push({
                 id: id,
                 text: msg,
                 modal: modal
@@ -135,7 +137,7 @@ define([
         _spinnerHideProgressReplacement: function(pid) {
             this.debug("._spinnerHideProgressReplacement " + pid + "/" + this._spinnerShowPending);
 
-            var message = this._findInArray(this._spinnerMessages, function (msg) {
+            var message = this._findInArray(window.__SpinnerMessages, function (msg) {
                 return msg.id === pid;
             });
 
@@ -165,9 +167,9 @@ define([
         },
 
         _removeMsg: function (id) {
-            var index = this._findIndex(this._spinnerMessages, function (msg) { return msg.id === id; });
+            var index = this._findIndex(window.__SpinnerMessages, function (msg) { return msg.id === id; });
             if (index !== -1) {
-                this._spinnerMessages.splice(index, 1);
+                window.__SpinnerMessages.splice(index, 1);
             }
         }
     });
