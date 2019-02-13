@@ -38,8 +38,8 @@ define([
                             //console.log("success: " + msg)
                         }); // called when the screenshot was hidden (almost instantly)
                     }
-                    if (args.handlerCancel) {
-                        args.handlerCancel();
+                    if (args.onCancel) {
+                        args.onCancel();
                     }
                 }
             }, "Confirm", [args.proceed, args.cancel]);
