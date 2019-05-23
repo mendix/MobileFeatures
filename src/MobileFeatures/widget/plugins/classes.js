@@ -90,7 +90,7 @@ define([
         },
 
         _enableConnectionDetection: function () {
-            this._toggleStatus(true);
+            this._onOnline();
             document.addEventListener("offline", lang.hitch(this, this._onOffline), false);
             document.addEventListener("online", lang.hitch(this, this._onOnline), false);
         },
