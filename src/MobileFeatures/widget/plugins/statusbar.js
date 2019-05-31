@@ -33,7 +33,20 @@ define([
                     StatusBar.hide();
                 }
                 if (StatusBar.overlaysWebView) {
-                    StatusBar.overlaysWebView(this.statusbarOverlayWebView);
+                    console.log("device.model", device.model);
+                    var list = [];
+                    try {
+                        list = JSON.parse("[" + this.disableStatusBarWebviewDevice + "]");
+                    } catch(error) {
+                        console.log(`no valid list of devices, expect "mode a", "model b" : ` + this.disableStatusBarWebviewDevice, error);
+                    }
+                    var inverse = list.indexOf(device.model) !== -1;
+                    if (inverse) {
+                        console.log("Inverse overlaysWebView setting status bar for device "+ device.model);
+                    }
+                    var overlay = inverse ? !this.statusbarOverlayWebView : this.statusbarOverlayWebView;
+                    console.log("overlaysWebView", overlay)
+                    StatusBar.overlaysWebView(overlay);
                 }
             } else {
                 console.warn(this.id + "._enableStatusbar: cannot find StatusBar");

@@ -146,6 +146,11 @@
             <category>Statusbar</category>
             <description>iOS only, if true, the status bar overlays the top part of the page content. Otherwise, it is seperate from the page content.</description>
         </property>
+        <property key="disableStatusBarWebviewDevice" type="string" required="false">
+            <caption>Overlay Status Bar inverse Devices</caption>
+            <category>Statusbar</category>
+            <description>List if device models to invere status bar option: "Model a", "Model b" </description>
+        </property>
         <!-- CONNECTION ERROR -->
         <!--<property key="customConnectionErrorEnabled" type="boolean" defaultValue="true">
             <caption>Enable Custom Error</caption>
