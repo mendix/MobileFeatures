@@ -10,7 +10,7 @@ test/.project
 *.tmp
 *.lock
 .idea/
-
+dist/MxTestProject
 test/
 
 node_modules/
