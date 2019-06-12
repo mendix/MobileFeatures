@@ -55,7 +55,7 @@ define([
                 window.__SpinnerMessages = window.__SpinnerMessages || [];
                 window.__SpinnerMessageID = window.__SpinnerMessageID || 1;
                 // this._spinnerMessages = [];
-                // this._spinnerEnabled = true;
+                this._spinnerEnabled = true;
             } else if (!!mx.ui.hideProgressOrig) {
                 this.debug("._enableSpinner spinner is already enabled. Locking previous one");
                 if (!window.__SpinnerLock) {
