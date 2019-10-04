@@ -28,6 +28,9 @@ define([
 
         _confirmationReplacement: function(args) {
             this.debug("._confirmationReplacement");
+            var proceed = args.proceed || this.mxTranslation("mxui.widget.DialogMessage", "ok", "Ok");
+            var cancel = args.cancel || this.mxTranslation("mxui.widget.DialogMessage", "cancel", "Cancel");
+            var confirm = this.mxTranslation("mxui.widget.ConfirmationDialog", "caption", "Confirmation");
             navigator.notification.confirm(args.content, function(buttonNum) {
                 if (buttonNum === 1) {
                     args.handler();
@@ -42,17 +45,27 @@ define([
                         args.onCancel();
                     }
                 }
-            }, "Confirm", [args.proceed, args.cancel]);
+            }, confirm, [proceed, cancel]);
         },
 
         _infoReplacement: function(msg, modal) {
-            navigator.notification.alert(msg, null, "Info");
+            var info = this.mxTranslation("mxui.widget.DialogMessage", "info", "Info");
+            navigator.notification.alert(msg, null, info);
         },
         _warningReplacement: function(msg, modal) {
-            navigator.notification.alert(msg, null, "Warning");
+            var warning = this.mxTranslation("mxui.widget.DialogMessage", "warning", "Warning");
+            navigator.notification.alert(msg, null, warning);
         },
         _errorReplacement: function(msg, modal) {
-            navigator.notification.alert(msg, null, "Error");
+            var error = this.mxTranslation("mxui.widget.DialogMessage", "error", "Error");
+            navigator.notification.alert(msg, null, error);
+        },
+
+        mxTranslation: function(namespace, key, fallback) {
+            return window.mx.session.getConfig("uiconfig.translations." + namespace + "." + key)
+                || (window.mx.session.getConfig("uiconfig.translations"))[namespace + "." + key]
+                || fallback
+                || "[No translation]";
         }
 
     });
