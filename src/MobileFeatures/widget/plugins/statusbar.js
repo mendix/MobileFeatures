@@ -33,7 +33,17 @@ define([
                     StatusBar.hide();
                 }
                 if (StatusBar.overlaysWebView) {
+
                     StatusBar.overlaysWebView(this.statusbarOverlayWebView);
+
+                    // Because of the bug in CKWEBView, we need to flick with timeout
+                    // If overlay is false
+                    if (!this.statusbarOverlayWebView){
+                        setTimeout(()=> {
+                            StatusBar.overlaysWebView(!this.statusbarOverlayWebView);
+                            StatusBar.overlaysWebView(this.statusbarOverlayWebView);
+                        }, 1000)
+                    }
                 }
             } else {
                 console.warn(this.id + "._enableStatusbar: cannot find StatusBar");
