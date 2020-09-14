@@ -1,9 +1,9 @@
 {
   "name": "MobileFeatures",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Features for Mobile",
   "license": "Apache 2",
-  "author": "J.W. Lagendijk <jelte.lagendijk@mendix.com>",
+  "author": "Mendix",
   "private": true,
   "dependencies": {},
   "devDependencies": {
